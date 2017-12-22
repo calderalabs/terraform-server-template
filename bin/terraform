@@ -1,0 +1,8 @@
+#!/bin/bash
+
+app_root="`dirname $0`/../"
+
+terraform "${@}" -var-file="$app_root/settings.json"\
+  -var="aws_access_key_id=$AWS_ACCESS_KEY_ID"\
+  -var="aws_secret_key=$AWS_SECRET_KEY"\
+  "$app_root/terraform"

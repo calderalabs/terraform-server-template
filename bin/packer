@@ -1,0 +1,4 @@
+#!/bin/bash
+
+app_root="`dirname $0`/../"
+packer "${@}" -var-file="$app_root/settings.json" "$app_root/packer.json"
