@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
+app_root="$(cd "$(dirname $0)/.." && pwd)"
 
-app_root="`dirname $0`/../"
-packer "${@}" -var-file="$app_root/settings.json" "$app_root/packer.json"
+packer build $app_root/packer.json

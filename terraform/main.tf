@@ -1,20 +1,10 @@
 provider "aws" {
-  region = "eu-west-1"
+  region = "${var.aws_region}"
   access_key = "${var.aws_access_key_id}"
   secret_key = "${var.aws_secret_key}"
 }
 
-locals {
-  run_ansible_script = <<EOS
-    sudo ANSIBLE_CONFIG=/tmp/staging/ansible/config/ansible.cfg \
-    ansible-playbook /tmp/staging/ansible/playbook.yml \
-    --extra-vars=@/tmp/staging/settings.json --connection=local --inventory /tmp/staging/ansible/inventory.yml
-  EOS
-}
-
 resource "aws_security_group" "web" {
-  name = "terraform"
-
   ingress {
     from_port = 0
     to_port = 0
@@ -31,46 +21,27 @@ resource "aws_security_group" "web" {
 }
 
 resource "aws_key_pair" "web" {
-  key_name = "terraform"
-  public_key = "${var.aws_ssh_public_key}"
+  public_key = "${var.ssh_public_key}"
+}
+
+data "aws_ami" "web" {
+  most_recent = true
+  owners = ["self"]
+
+  filter {
+    name = "tag:Name"
+    values = ["${var.app_name}"]
+  }
 }
 
 resource "aws_instance" "web" {
-  ami = "${var.aws_ami_id}"
+  ami = "${data.aws_ami.web.id}"
   instance_type = "${var.aws_instance_type}"
-  key_name = "terraform"
-  security_groups = ["terraform"]
+  key_name = "${aws_key_pair.web.key_name}"
+  security_groups = ["${aws_security_group.web.name}"]
 
-  connection {
-    type = "ssh"
-    user = "ubuntu"
-    private_key = "${var.aws_ssh_private_key}"
-  }
-
-  tags {
-    Name = "${var.app_name}"
-  }
-
-  provisioner "remote-exec" {
-    inline = ["mkdir /tmp/staging"]
-  }
-
-  provisioner "file" {
-    source = "${path.root}/../ansible"
-    destination = "/tmp/staging"
-  }
-
-  provisioner "file" {
-    source = "${path.root}/../settings.json"
-    destination = "/tmp/staging/settings.json"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo ansible-galaxy install -r /tmp/staging/ansible/requirements.yml",
-      "${local.run_ansible_script}",
-      "rm -rf /tmp/staging"
-    ]
+  lifecycle {
+    ignore_changes = ["ami"]
   }
 }
 

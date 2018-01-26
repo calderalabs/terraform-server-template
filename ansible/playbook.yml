@@ -1,22 +1,14 @@
 - hosts: all
   vars:
-    dokku_version: 0.11.1
+    dokku_version: 0.11.3
     install_dokku_script: |
-      DOKKU_TAG=v{{ dokku_version }} DOKKU_WEB_CONFIG=false DOKKU_KEY_FILE=id_rsa.pub bash install-dokku.sh
+      echo "{{ lookup('env', 'SSH_PUBLIC_KEY') }}" > key.pub
+      DOKKU_TAG=v{{ dokku_version }} DOKKU_WEB_CONFIG=false DOKKU_KEY_FILE="$(pwd)/key.pub" bash install-dokku.sh
+      echo "installed dokku"
       touch dokku-{{ dokku_version }}-installed
       creates=dokku-{{ dokku_version }}-installed
   tasks:
-    - command: ssh-keygen -f id_rsa -t rsa -b 4096 -N "" -C "" creates=id_rsa
     - get_url:
         url: https://raw.githubusercontent.com/dokku/dokku/v{{ dokku_version }}/bootstrap.sh
         dest: "./install-dokku.sh"
     - shell: "{{ install_dokku_script }} become=true"
-  roles:
-    - role: ANXS.postgresql
-      become: true
-      postgresql_version: 9.6
-      postgresql_databases:
-        - name: "{{ app_name }}"
-    - role: DavidWittman.redis
-      become: true
-      redis_version: 4.0.6

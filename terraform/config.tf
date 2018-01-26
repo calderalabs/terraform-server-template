@@ -1,7 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "caldera-terraform"
-    key = "YOUR_APP_NAME"
+    bucket = "calderalabs-terraform"
     region = "eu-west-1"
   }
 }
