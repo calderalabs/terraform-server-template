@@ -10,7 +10,7 @@ TERRAFORM_PATH = os.environ.get('ANSIBLE_TF_BIN', 'terraform')
 TERRAFORM_DIR = os.environ.get('ANSIBLE_TF_DIR', os.getcwd())
 
 def _inventory(state):
-  root_module = filter(lambda m: m[  'path'][0] == 'root', state['modules'])[0]
+  root_module = filter(lambda m: m['path'][0] == 'root', state['modules'])[0]
   host = root_module['outputs']['public_ip']['value']
 
   return {
