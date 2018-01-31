@@ -1,5 +1,7 @@
 # Terraform Server Template
 
+A very minimal template for Terraform + Ansible + Dokku
+
 ## How to Bootstrap
 
 - Clone the repo with `git clone git@github.com:calderalabs/terraform-server-template.git`
