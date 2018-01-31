@@ -33,6 +33,13 @@
       register: dokku_keys_result
       changed_when: false
       failed_when: dokku_keys_result.rc != 0 and "No public keys found" not in dokku_keys_result.stderr
+    - command: dokku ssh-keys:remove admin
+      register: dokku_remove_key_result
+      changed_when: dokku_remove_key_result | succeeded
+      become: true
+      when:
+        'NAME="admin"' in dokku_keys_result.stdout and
+        '%s NAME="admin"' % ssh_keygen_result.stdout.split(' ')[1] not in dokku_keys_result.stdout
     - command: bash -c 'dokku ssh-keys:add admin {{dokku_public_key_file | quote}} < /dev/null'
       register: dokku_add_key_result
       changed_when: dokku_add_key_result | succeeded
