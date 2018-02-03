@@ -7,7 +7,6 @@ A very minimal template for Terraform + Ansible + Dokku
 - Clone the repo with `git clone git@github.com:calderalabs/terraform-server-template.git`
 - Rename `.env-example` to `.env` and fill in empty variables
 - Run `brew install ansible`
-- Run `npm install -g @nbering/terraform-inventory`
 - Run `./bin/terraform/init`
 - Run `./bin/packer`
 - Run `./bin/create-env production`
