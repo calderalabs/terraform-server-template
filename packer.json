@@ -43,6 +43,9 @@
   }, {
     "type": "ansible-local",
     "playbook_file": "{{template_dir}}/ansible/playbook.yml",
-    "extra_arguments": ["--extra-vars \"ssh_public_key_file={{user `ssh_public_key_dest`}}\""]
+    "extra_arguments": [
+      "--extra-vars \"ssh_public_key_file={{user `ssh_public_key_dest`}}\"",
+      "--extra-vars \"app_name={{user `app_name`}}\""
+    ]
   }]
 }

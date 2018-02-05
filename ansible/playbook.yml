@@ -1,5 +1,6 @@
 - hosts: all
   vars:
+    app_name: "{{lookup('env', 'APP_NAME')}}"
     dokku_version: 0.11.3
     ssh_public_key_file: "{{lookup('env', 'SSH_PUBLIC_KEY_FILE')}}"
     dokku_public_key_file: "{{ansible_env.HOME}}/dokku_key.pub"
@@ -51,3 +52,35 @@
       changed_when: dokku_add_key_result | succeeded
       become: true
       when: "'%s NAME=\"admin\"' % ssh_keygen_result.stdout.split(' ')[1] not in dokku_keys_result.stdout"
+    - command: dokku apps:list
+      register: dokku_apps_list_result
+      changed_when: false
+    - command: dokku apps:create {{app_name}}
+      register: dokku_apps_create_result
+      become: true
+      when: app_name not in dokku_apps_list_result.stdout
+      changed_when: dokku_apps_create_result | succeeded
+    - command: dokku plugin
+      register: dokku_plugin_result
+      changed_when: false
+    - command: dokku plugin:install https://github.com/dokku/dokku-postgres.git postgres
+      register: dokku_plugin_install_postgres_result
+      become: true
+      when: "'postgres' not in dokku_plugin_result.stdout"
+      changed_when: dokku_plugin_install_postgres_result | succeeded
+    - command: dokku postgres:list
+      register: dokku_postgres_list_result
+      changed_when: false
+    - command: dokku postgres:create {{app_name}}
+      register: dokku_postgres_create_result
+      become: true
+      when: app_name not in dokku_postgres_list_result.stdout
+      changed_when: dokku_postgres_create_result | succeeded
+    - command: dokku postgres:info {{app_name}} --links
+      register: dokku_postgres_info_result
+      changed_when: false
+    - command: dokku postgres:link {{app_name}} {{app_name}}
+      register: dokku_postgres_link_result
+      become: true
+      when: app_name not in dokku_postgres_info_result.stdout
+      changed_when: dokku_postgres_link_result | succeeded

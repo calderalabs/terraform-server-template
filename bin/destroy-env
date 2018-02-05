@@ -12,5 +12,5 @@ terraform destroy\
   -var="ssh_public_key_file=$SSH_PUBLIC_KEY_FILE"
 
 terraform workspace select default
-terraform workspace delete -force $1
+terraform workspace delete $1
 git remote remove $1
