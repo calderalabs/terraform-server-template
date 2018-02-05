@@ -1,6 +1,7 @@
 - hosts: all
   vars:
     dokku_version: 0.11.3
+    ssh_public_key_file: "{{lookup('env', 'SSH_PUBLIC_KEY_FILE')}}"
     dokku_public_key_file: "{{ansible_env.HOME}}/dokku_key.pub"
     install_dokku: "{{ansible_env.HOME}}/install-dokku-{{dokku_version}}"
   tasks:
@@ -23,8 +24,13 @@
         DOKKU_TAG: v{{dokku_version}}
         DOKKU_WEB_CONFIG: "false"
         DOKKU_SKIP_KEY_FILE: "true"
+        DOKKU_VHOST_ENABLE: "true"
+    - file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      become: true
     - copy:
-        content: "{{lookup('env', 'SSH_PUBLIC_KEY')}}"
+        src: "{{ssh_public_key_file}}"
         dest: "{{dokku_public_key_file}}"
     - command: ssh-keygen -l -f {{dokku_public_key_file}}
       register: ssh_keygen_result
@@ -38,8 +44,8 @@
       changed_when: dokku_remove_key_result | succeeded
       become: true
       when:
-        'NAME="admin"' in dokku_keys_result.stdout and
-        '%s NAME="admin"' % ssh_keygen_result.stdout.split(' ')[1] not in dokku_keys_result.stdout
+        "'NAME=\"admin\"' in dokku_keys_result.stdout and
+        '%s NAME=\"admin\"' % ssh_keygen_result.stdout.split(' ')[1] not in dokku_keys_result.stdout"
     - command: bash -c 'dokku ssh-keys:add admin {{dokku_public_key_file | quote}} < /dev/null'
       register: dokku_add_key_result
       changed_when: dokku_add_key_result | succeeded

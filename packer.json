@@ -3,7 +3,9 @@
     "aws_access_key_id": "{{env `AWS_ACCESS_KEY_ID`}}",
     "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
     "aws_region": "{{env `AWS_REGION`}}",
-    "app_name": "{{env `APP_NAME`}}"
+    "app_name": "{{env `APP_NAME`}}",
+    "ssh_public_key_file": "{{env `SSH_PUBLIC_KEY_FILE`}}",
+    "ssh_public_key_dest": "/tmp/{{uuid}}.pub"
   },
   "builders": [{
     "type": "amazon-ebs",
@@ -35,7 +37,12 @@
       "sudo apt-get install ansible -y"
     ]
   }, {
+    "type": "file",
+    "source": "{{user `ssh_public_key_file`}}",
+    "destination": "{{user `ssh_public_key_dest`}}"
+  }, {
     "type": "ansible-local",
-    "playbook_file": "{{template_dir}}/ansible/playbook.yml"
+    "playbook_file": "{{template_dir}}/ansible/playbook.yml",
+    "extra_arguments": ["--extra-vars \"ssh_public_key_file={{user `ssh_public_key_dest`}}\""]
   }]
 }

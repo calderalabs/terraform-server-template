@@ -21,7 +21,7 @@ resource "aws_security_group" "web" {
 }
 
 resource "aws_key_pair" "web" {
-  public_key = "${var.ssh_public_key}"
+  public_key = "${file(var.ssh_public_key_file)}"
 }
 
 data "aws_ami" "web" {
